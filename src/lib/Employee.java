@@ -13,9 +13,7 @@ public class Employee {
 	private String idNumber;
 	private String address;
 	
-	private int yearJoined;
-	private int monthJoined;
-	private int dayJoined;
+	private LocalDate joinedDate;
 	private int monthWorkingInYear;
 	
 	private boolean isForeigner;
@@ -31,21 +29,20 @@ public class Employee {
 	private List<String> childNames;
 	private List<String> childIdNumbers;
 	
-	public Employee(String employeeId, String firstName, String lastName, String idNumber, String address, int yearJoined, int monthJoined, int dayJoined, boolean isForeigner, boolean gender) {
-		this.employeeId = employeeId;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.idNumber = idNumber;
-		this.address = address;
-		this.yearJoined = yearJoined;
-		this.monthJoined = monthJoined;
-		this.dayJoined = dayJoined;
-		this.isForeigner = isForeigner;
-		this.gender = gender;
-		
-		childNames = new LinkedList<String>();
-		childIdNumbers = new LinkedList<String>();
-	}
+	public Employee(String employeeId, String firstName, String lastName, String idNumber, String address,
+                 int yearJoined, int monthJoined, int dayJoined, boolean isForeigner, boolean gender) {
+     this.employeeId = employeeId;
+     this.firstName = firstName;
+     this.lastName = lastName;
+     this.idNumber = idNumber;
+     this.address = address;
+     this.joinedDate = LocalDate.of(yearJoined, monthJoined, dayJoined);
+     this.isForeigner = isForeigner;
+     this.gender = gender;
+ 
+     childNames = new LinkedList<>();
+     childIdNumbers = new LinkedList<>();
+ }
 
 	// Employee.java
  // Refactor: Duplicate Code (bad smell) removed
@@ -99,15 +96,22 @@ public class Employee {
 	
 	public int getAnnualIncomeTax() {
 		
-		//Menghitung berapa lama pegawai bekerja dalam setahun ini, jika pegawai sudah bekerja dari tahun sebelumnya maka otomatis dianggap 12 bulan.
-		LocalDate date = LocalDate.now();
-		
-		if (date.getYear() == yearJoined) {
-			monthWorkingInYear = date.getMonthValue() - monthJoined;
-		}else {
+		LocalDate currentDate = LocalDate.now();
+ 	
+ 		if (currentDate.getYear() == joinedDate.getYear()) {
+ 			monthWorkingInYear = currentDate.getMonthValue() - joinedDate.getMonthValue();
+ 		} else {
 			monthWorkingInYear = 12;
 		}
 		
-		return TaxFunction.calculateTax(monthlySalary, otherMonthlyIncome, monthWorkingInYear, annualDeductible, spouseIdNumber.equals(""), childIdNumbers.size());
+		return TaxFunction.calculateTax(
+ 			monthlySalary,
+ 			otherMonthlyIncome,
+ 			monthWorkingInYear,
+ 			annualDeductible,
+ 			spouseIdNumber == null || spouseIdNumber.isEmpty(),
+ 			childIdNumbers.size()
+ 		);
+ 	}
 	}
-}
+
